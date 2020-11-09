@@ -30,12 +30,15 @@ public class WSCommands {
 
         String prefix = PluginConfig.getPrefix();
         cs.sendMessage(
-                prefix + "WorldSystem by Butzlabben v" + WorldSystem.getInstance().getDescription().getVersion());
+                prefix + "WorldSystem by Butzlabben v + Trainerlord" + WorldSystem.getInstance().getDescription().getVersion());
         cs.sendMessage(prefix + "Contributors: Jubeki, montlikadani, jstoeckm2");
         List<String> cmdHelp = MessageConfig.getCommandHelp();
         cmdHelp.forEach(s -> cs.sendMessage(prefix + s));
         if (cs.hasPermission("ws.delete")) {
             cs.sendMessage(MessageConfig.getDeleteCommandHelp());
+        }
+        if (cs.hasPermission("ws.saveall")) {
+            cs.sendMessage(MessageConfig.getSaveCommandHelp());
         }
         return true;
     }
