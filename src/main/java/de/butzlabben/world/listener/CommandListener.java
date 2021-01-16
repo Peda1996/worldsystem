@@ -39,15 +39,10 @@ public class CommandListener implements Listener {
         }
 
         // Fix for #18
-        if (from.equals(to) || fromIsSystemWorld) {
+        if (fromIsSystemWorld) {
             // Save location for #23
-            if (fromIsSystemWorld) {
-                WorldConfig config = WorldConfig.getWorldConfig(from.getName());
-                PlayerPositions.instance.saveWorldsPlayerLocation(p, config);
-            } else {
-                if (toIsSystemWorld)
-                    PlayerPositions.instance.savePlayerLocation(p);
-            }
+            WorldConfig config = WorldConfig.getWorldConfig(from.getName());
+            PlayerPositions.instance.saveWorldsPlayerLocation(p, config);
             GameMode gameMode = PluginConfig.getSpawnGamemode();
             if (toIsSystemWorld) {
                 if (PluginConfig.isSurvival()) {
