@@ -10,6 +10,7 @@
         import de.butzlabben.world.util.PlayerPositions;
         import de.butzlabben.world.util.PlayerWrapper;
         import de.butzlabben.world.util.VersionUtil;
+        import de.butzlabben.world.util.WorldFileUtils;
         import org.apache.commons.io.FileUtils;
         import org.bukkit.*;
         import org.bukkit.entity.Player;
@@ -20,8 +21,9 @@
         import java.io.IOException;
         import java.util.HashMap;
         import java.util.UUID;
+        import java.util.logging.Level;
 
-/**
+        /**
  * This class represents a systemworld, loaded or not
  *
  * @author Butzlabben
@@ -141,7 +143,8 @@ public class SystemWorld {
                 }
             }
             try {
-                FileUtils.moveDirectoryToDirectory(world, Bukkit.getWorldContainer(), false);
+                //TODO in runnable?
+                WorldFileUtils.moveDirectoryToDirectory(world, Bukkit.getWorldContainer(), false);
             } catch (IOException e) {
                 if (p != null && p.isOnline())
                     p.sendMessage(PluginConfig.getPrefix() + "§cError: " + e.getMessage());
@@ -192,6 +195,9 @@ public class SystemWorld {
         }
         Preconditions.checkNotNull(w, "world must not be null");
         setUnloading(true);
+        Bukkit.getLogger().log(Level.INFO,
+                "[WorldSystem] Unloading World Chunks: " + w.getName());
+
         w.save();
         Chunk[] arrayOfChunk;
         int j = (arrayOfChunk = w.getLoadedChunks()).length;
@@ -207,11 +213,15 @@ public class SystemWorld {
             a.setGameMode(PluginConfig.getSpawnGamemode());
         }
         if (unloading) {
+            Bukkit.getLogger().log(Level.INFO,
+                    "[WorldSystem] Unloading World: " + w.getName());
             if (Bukkit.unloadWorld(w, true)) {
                 File worldinserver = new File(Bukkit.getWorldContainer(), worldname);
                 File worlddir = new File(PluginConfig.getWorlddir());
+                Bukkit.getLogger().log(Level.INFO,
+                        "[WorldSystem] Move World Data: " + w.getName());
                 try {
-                    FileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
+                    WorldFileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
                     Bukkit.getWorlds().remove(w);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -227,6 +237,7 @@ public class SystemWorld {
      * @throws NullPointerException w == null
      */
     private void unloadLater(World w) {
+
         if (!Bukkit.isPrimaryThread()) {
             Bukkit.getScheduler().runTask(WorldSystem.getInstance(), () -> unloadLater(w));
             return;
@@ -244,6 +255,8 @@ public class SystemWorld {
             return;
         // Set unloading to true
         setUnloading(true);
+        Bukkit.getLogger().log(Level.INFO,
+                "[WorldSystem] Unloading World Chunks: " + w.getName());
         w.save();
         Chunk[] arrayOfChunk;
         int j = (arrayOfChunk = w.getLoadedChunks()).length;
@@ -259,11 +272,15 @@ public class SystemWorld {
         unloadLaterTask = Bukkit.getScheduler().runTaskLater(WorldSystem.getInstance(), () -> {
             // Still in world unloading process?
             if (unloading && w.getPlayers().size() == 0) {
+                Bukkit.getLogger().log(Level.INFO,
+                        "[WorldSystem] Unloading World: " + w.getName());
                 if (Bukkit.unloadWorld(w, true)) {
                     File worldinserver = new File(Bukkit.getWorldContainer(), worldname);
                     File worlddir = new File(PluginConfig.getWorlddir());
+                    Bukkit.getLogger().log(Level.INFO,
+                            "[WorldSystem] Move World Data: " + w.getName());
                     try {
-                        FileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
+                        WorldFileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
                         Bukkit.getWorlds().remove(w);
                         setUnloading(false);
                     } catch (IOException e) {
@@ -322,7 +339,7 @@ public class SystemWorld {
 
             //Move world if exists
             try {
-                FileUtils.moveDirectoryToDirectory(world, Bukkit.getWorldContainer(), false);
+                WorldFileUtils.moveDirectoryToDirectory(world, Bukkit.getWorldContainer(), false);
             } catch (IOException e) {
                 System.err.println("Couldn't load world of " + p.getName());
                 p.sendMessage(PluginConfig.getPrefix() + "§cError: " + e.getMessage());

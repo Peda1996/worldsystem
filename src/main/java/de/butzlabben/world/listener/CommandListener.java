@@ -26,43 +26,20 @@ public class CommandListener implements Listener {
         World to = e.getTo().getWorld();
         boolean fromIsSystemWorld = WorldConfig.exists(from.getName());
         boolean toIsSystemWorld = WorldConfig.exists(to.getName());
-        WorldPlayer wp = new WorldPlayer(p);
 
-        if (from != to)
+        if (!(from.equals(to)))
             SystemWorld.tryUnloadLater(from);
 
+        WorldPlayer wpTo = new WorldPlayer(Bukkit.getOfflinePlayer(p.getUniqueId()), to.getName());
+
         if (e.getCause() == TeleportCause.SPECTATE) {
-            if (from != to && toIsSystemWorld) {
-                if (!p.hasPermission("ws.tp.toother")) {
-                    e.setCancelled(true);
-                    p.sendMessage(MessageConfig.getNoPermission());
-                    return;
-                }
-            }
-
-            if (!wp.isOnSystemWorld() || wp.isOwnerofWorld() || wp.canTeleport() || p.hasPermission("ws.tp.toother"))
-                return;
-
-            e.setCancelled(true);
-            p.sendMessage(MessageConfig.getNoPermission());
+            if (checkTeleportPermissions(e, p, from, to, toIsSystemWorld, wpTo)) return;
         } else if (e.getCause() == TeleportCause.COMMAND) {
-            if (from != to && toIsSystemWorld) {
-                if (!p.hasPermission("ws.tp.toother")) {
-                    e.setCancelled(true);
-                    p.sendMessage(MessageConfig.getNoPermission());
-                    return;
-                }
-            }
-
-            if (!wp.isOnSystemWorld() || wp.isOwnerofWorld() || wp.canTeleport() || p.hasPermission("ws.tp.toother"))
-                return;
-
-            e.setCancelled(true);
-            p.sendMessage(MessageConfig.getNoPermission());
+            if (checkTeleportPermissions(e, p, from, to, toIsSystemWorld, wpTo)) return;
         }
 
         // Fix for #18
-        if (from != to || fromIsSystemWorld) {
+        if (from.equals(to) || fromIsSystemWorld) {
             // Save location for #23
             if (fromIsSystemWorld) {
                 WorldConfig config = WorldConfig.getWorldConfig(from.getName());
@@ -82,6 +59,18 @@ public class CommandListener implements Listener {
 
             p.setGameMode(gameMode);
         }
+    }
+
+    private boolean checkTeleportPermissions(PlayerTeleportEvent e, Player p, World from, World to, boolean toIsSystemWorld, WorldPlayer wpto) {
+        if(!wpto.isOnSystemWorld())
+            return false;
+
+        //close event
+        if(!p.hasPermission("ws.tp.toother") && !wpto.isOwnerofWorld() && !wpto.canTeleport()){
+            p.sendMessage(MessageConfig.getNoPermission());
+            e.setCancelled(true);
+        }
+        return true;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -121,7 +110,7 @@ public class CommandListener implements Listener {
                 Player a = Bukkit.getPlayer(args[1]);
                 if (a == null)
                     return;
-                if (p.getWorld() != a.getWorld()) {
+                if (!(p.getWorld().equals(a.getWorld()))) {
                     e.setCancelled(true);
                     p.sendMessage(MessageConfig.getNoPermission());
                     return;

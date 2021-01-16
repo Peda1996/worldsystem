@@ -10,6 +10,7 @@ import de.butzlabben.world.event.WorldToggleFireEvent;
 import de.butzlabben.world.event.WorldToggleTntEvent;
 import de.butzlabben.world.gui.WorldChooseGUI;
 import de.butzlabben.world.util.PlayerPositions;
+import de.butzlabben.world.util.WorldFileUtils;
 import de.butzlabben.world.wrapper.SystemWorld;
 import de.butzlabben.world.wrapper.WorldPlayer;
 import de.butzlabben.world.wrapper.WorldTemplate;
@@ -248,6 +249,7 @@ public class WorldSettingsCommands {
                 FileUtils.copyDirectory(templateDirectory, f);
             toConfirm.remove(p);
 
+            //TODO maybe change that back later? don't know yet..
             FileUtils.moveDirectoryToDirectory(f, Bukkit.getWorldContainer(), false);
 
             WorldConfig config = WorldConfig.getWorldConfig(worldname);
