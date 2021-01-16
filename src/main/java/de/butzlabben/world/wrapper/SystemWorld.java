@@ -1,29 +1,29 @@
 
-        package de.butzlabben.world.wrapper;
+package de.butzlabben.world.wrapper;
 
-        import com.google.common.base.Preconditions;
-        import de.butzlabben.world.WorldSystem;
-        import de.butzlabben.world.config.*;
-        import de.butzlabben.world.event.WorldCreateEvent;
-        import de.butzlabben.world.event.WorldLoadEvent;
-        import de.butzlabben.world.event.WorldUnloadEvent;
-        import de.butzlabben.world.util.PlayerPositions;
-        import de.butzlabben.world.util.PlayerWrapper;
-        import de.butzlabben.world.util.VersionUtil;
-        import de.butzlabben.world.util.WorldFileUtils;
-        import org.apache.commons.io.FileUtils;
-        import org.bukkit.*;
-        import org.bukkit.entity.Player;
-        import org.bukkit.scheduler.BukkitRunnable;
-        import org.bukkit.scheduler.BukkitTask;
+import com.google.common.base.Preconditions;
+import de.butzlabben.world.WorldSystem;
+import de.butzlabben.world.config.*;
+import de.butzlabben.world.event.WorldCreateEvent;
+import de.butzlabben.world.event.WorldLoadEvent;
+import de.butzlabben.world.event.WorldUnloadEvent;
+import de.butzlabben.world.util.PlayerPositions;
+import de.butzlabben.world.util.PlayerWrapper;
+import de.butzlabben.world.util.VersionUtil;
+import de.butzlabben.world.util.WorldFileUtils;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
-        import java.io.File;
-        import java.io.IOException;
-        import java.util.HashMap;
-        import java.util.UUID;
-        import java.util.logging.Level;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.logging.Level;
 
-        /**
+/**
  * This class represents a systemworld, loaded or not
  *
  * @author Butzlabben
@@ -137,6 +137,7 @@ public class SystemWorld {
             if (new File(Bukkit.getWorldContainer(), worldname).exists()
                     && new File(PluginConfig.getWorlddir() + "/" + worldname).exists()) {
                 try {
+                    WorldFileUtils.cancelScheduledForLaterMove(new File(Bukkit.getWorldContainer(), worldname));
                     FileUtils.deleteDirectory(new File(Bukkit.getWorldContainer(), worldname));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -220,12 +221,10 @@ public class SystemWorld {
                 File worlddir = new File(PluginConfig.getWorlddir());
                 Bukkit.getLogger().log(Level.INFO,
                         "[WorldSystem] Move World Data: " + w.getName());
-                try {
-                    WorldFileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
-                    Bukkit.getWorlds().remove(w);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+                WorldFileUtils.moveDirectoryToDirectoryLater(worldinserver, worlddir, false);
+                Bukkit.getWorlds().remove(w);
+
             }
         }
     }
@@ -279,13 +278,11 @@ public class SystemWorld {
                     File worlddir = new File(PluginConfig.getWorlddir());
                     Bukkit.getLogger().log(Level.INFO,
                             "[WorldSystem] Move World Data: " + w.getName());
-                    try {
-                        WorldFileUtils.moveDirectoryToDirectory(worldinserver, worlddir, false);
-                        Bukkit.getWorlds().remove(w);
-                        setUnloading(false);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+                    WorldFileUtils.moveDirectoryToDirectoryLater(worldinserver, worlddir, false);
+                    Bukkit.getWorlds().remove(w);
+                    setUnloading(false);
+
                 }
             }
         }, 20 * PluginConfig.getUnloadingTime());
@@ -324,6 +321,9 @@ public class SystemWorld {
         String worlddir = PluginConfig.getWorlddir();
         File world = new File(worlddir + "/" + worldname);
 
+        WorldFileUtils.cancelScheduledForLaterMove(new File(Bukkit.getWorldContainer(), worldname));
+
+        //check now happens in the worldfolder
         if (world.exists()) {
             // Check for duplicated worlds
             File propablyExistingWorld = new File(Bukkit.getWorldContainer(), worldname);
@@ -336,6 +336,7 @@ public class SystemWorld {
                     e.printStackTrace();
                 }
             }
+
 
             //Move world if exists
             try {
