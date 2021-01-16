@@ -26,6 +26,10 @@ public class PlayerPositions {
     private final DatabaseUtil util = DatabaseProvider.instance.util;
 
 
+    public static PlayerPositions getInstance() {
+        return instance;
+    }
+
     private PlayerPositions() {
         checkTables();
     }
