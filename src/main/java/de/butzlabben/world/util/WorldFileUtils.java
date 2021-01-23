@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class WorldFileUtils {
 
@@ -20,15 +21,15 @@ public class WorldFileUtils {
         return new File(lockFile).delete();
     }
 
-    public static HashMap<File, BukkitTask> waitingForMove = new HashMap<>();
+    public static HashMap<File, BukkitTask> waitingForMoveFrom = new HashMap<>();
 
-    public static int moveBackDelay = 30 * 20; //moving back is delayed for 30 seconds
+    public static int moveBackDelay = 2 * 20; //moving back is delayed for 2 seconds
     public static int deleteDelay = 30 * 20; //moving back is delayed for 30 seconds
 
     public static void moveDirectoryToDirectory(File src, File dest, boolean create) throws IOException {
-        if (waitingForMove.containsKey(dest)) {
-            waitingForMove.get(dest).cancel();
-            waitingForMove.remove(dest);
+        if (waitingForMoveFrom.containsKey(dest)) {
+            waitingForMoveFrom.get(dest).cancel();
+            waitingForMoveFrom.remove(dest);
             return;
         }
 
@@ -60,28 +61,34 @@ public class WorldFileUtils {
     }
 
     public static void cancelScheduledForLaterMove(File world) {
-        if (waitingForMove.containsKey(world)) {
-            waitingForMove.get(world).cancel();
-            waitingForMove.remove(world);
+        if (waitingForMoveFrom.containsKey(world)) {
+            waitingForMoveFrom.get(world).cancel();
+            waitingForMoveFrom.remove(world);
         }
     }
 
-    public static void moveDirectoryToDirectoryLater(File worldinserver, File worlddir, boolean b) {
-        if (waitingForMove.containsKey(worldinserver))
+    public static void moveDirectoryToDirectoryLater(File worldinserver, File worlddir, boolean b, long time, Function<Void, Void> callback) {
+        if (waitingForMoveFrom.containsKey(worldinserver))
             return;
 
-        waitingForMove.put(worldinserver, Bukkit.getScheduler().runTaskLater(WorldSystem.getInstance(),
+        waitingForMoveFrom.put(worldinserver, Bukkit.getScheduler().runTaskLater(WorldSystem.getInstance(),
                 () -> {
                     try {
                         moveDirectoryToDirectory(worldinserver, worlddir, b);
-                        waitingForMove.remove(worldinserver);
+                        waitingForMoveFrom.remove(worldinserver);
+                        if (callback != null)
+                            callback.apply(null);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 },
-                10 * 20 //wait 10 seconds before we move the thing to the next folder
+                time//wait 10 seconds before we move the thing to the next folder
 
                 )
         );
+    }
+
+    public static void moveDirectoryToDirectoryLater(File worldinserver, File worlddir, boolean b) {
+        moveDirectoryToDirectoryLater(worldinserver, worlddir, b, moveBackDelay, null);
     }
 }
