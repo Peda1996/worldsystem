@@ -23,7 +23,7 @@ public class WorldFileUtils {
 
     public static HashMap<File, BukkitTask> waitingForMoveFrom = new HashMap<>();
 
-    public static int moveBackDelay = 2 * 20; //moving back is delayed for 2 seconds
+    public static int moveBackDelay = 30 * 20; //moving back is delayed for 30 seconds
     public static int deleteDelay = 30 * 20; //moving back is delayed for 30 seconds
 
     public static void moveDirectoryToDirectory(File src, File dest, boolean create) throws IOException {

@@ -162,6 +162,11 @@ repositories {
     // WorldEdit
     maven { url = "http://maven.enginehub.org/repo/" }
 
+    //papermc
+    maven {
+        url 'https://papermc.io/repo/repository/maven-public/'
+    }
+
     mavenCentral()
 }
 
@@ -170,6 +175,7 @@ dependencies {
     annotationProcessor lombok()
 
     compileOnly spigot(mcVersion)
+    compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
 
     //Add dependencies here
     //Test dependencies

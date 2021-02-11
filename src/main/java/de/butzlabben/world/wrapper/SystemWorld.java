@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
-
 /**
  * This class represents a systemworld, loaded or not
  *
@@ -216,6 +215,7 @@ public class SystemWorld {
         if (unloading) {
             Bukkit.getLogger().log(Level.INFO,
                     "[WorldSystem] Unloading World: " + w.getName());
+
             if (Bukkit.unloadWorld(w, true)) {
                 File worldinserver = new File(Bukkit.getWorldContainer(), worldname);
                 File worlddir = new File(PluginConfig.getWorlddir());
