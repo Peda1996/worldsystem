@@ -220,7 +220,7 @@ public class SystemWorld {
                 File worldinserver = new File(Bukkit.getWorldContainer(), worldname);
                 File worlddir = new File(PluginConfig.getWorlddir());
                 Bukkit.getLogger().log(Level.INFO,
-                        "[WorldSystem] Move World Data: " + w.getName());
+                        "[WorldSystem] Delayed Move World Data: (30s) " + w.getName());
 
                 WorldFileUtils.moveDirectoryToDirectoryLater(worldinserver, worlddir, false);
                 Bukkit.getWorlds().remove(w);
